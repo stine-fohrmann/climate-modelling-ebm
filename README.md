@@ -1,1 +1,1 @@
-# climate-modelling-ebm
+# Climate Modelling Project
