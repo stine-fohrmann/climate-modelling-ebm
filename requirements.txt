@@ -1,3 +1,8 @@
+ipykernel
+netcdf4
 matplotlib
 numpy
+xarray
 math
+pandas
+datetime
