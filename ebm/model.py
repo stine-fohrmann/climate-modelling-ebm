@@ -22,6 +22,9 @@ def run_model(
 
     T_abs[0] = T_ini
 
+    ce = cp*ORIGINAL_rho*H
+
+
     # time loop
     for it in range(0, itmax-1):
 
@@ -95,3 +98,61 @@ def run_with_changing_H(
     time = time/(secday*360)
 
     return T, time
+
+def run_with_changing_H_and_albedo(
+    T_ini   =ORIGINAL_T_ini, 
+    solar   =ORIGINAL_solar,
+    alpha_init=ORIGINAL_alpha,
+    d_alpha=0,
+    eps     =ORIGINAL_eps, 
+    sigma   =ORIGINAL_sigma, 
+    H       =ORIGINAL_H, 
+    maxtime =ORIGINAL_maxtime, 
+    dt      =ORIGINAL_dt, 
+    ce      =ORIGINAL_ce, 
+    cp      =ORIGINAL_cp,
+    rho=ORIGINAL_rho
+    ):
+
+    itmax = int(maxtime/dt)
+
+    # Initialization
+    time  = np.zeros(itmax)
+    T_abs = np.zeros(itmax)
+    alpha = np.zeros(itmax)
+
+    T_abs[0] = T_ini
+
+    alpha[0] = alpha_init
+
+
+    # time loop
+    for it in range(0, itmax-1):
+
+        # Compute incoming SW radiation
+        shortwave = 0.25 * solar * (1-alpha[it])
+
+        # Update albedo
+        alpha[it+1] = alpha[it] + d_alpha*alpha[it]
+
+        # Compute outgoing LW radiation
+        longwave  = eps * sigma * T_abs[it]**4
+
+        # Compute absolute temperature
+        T_abs[it+1] = T_abs[it] + dt * (shortwave - longwave)/ce
+
+        dH = 0.001 * T_abs[it]
+        # H = H + dH
+
+        ce = cp*rho*H
+
+        # advance time
+        time[it+1] = time[it] + dt
+
+    # Convert T_abs to Celcius
+    T = T_abs - 273.15
+
+    # Convert time axis to years
+    time = time/(secday*360)
+
+    return T, time, alpha
